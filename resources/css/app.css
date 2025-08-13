@@ -1,11 +1,92 @@
-@import 'tailwindcss';
+/* ================================================================== */
+/* Kode Awal: Arahan Wajib dari Tailwind CSS           */
+/* ================================================================== */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+
+/* ======================================= */
+/* ====== GAYA UNTUK VIDEO INTRO ====== */
+/* ======================================= */
+
+#video-intro-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000; /* Harus paling atas */
+    background-color: #fdfbf8; /* Warna latar belakang jika video gagal dimuat */
+    opacity: 1;
+    transition: opacity 1s ease-out; /* Transisi untuk menghilang */
+}
+
+#video-intro-container.hide {
+    opacity: 0;
+    pointer-events: none; /* Agar tidak bisa diklik setelah hilang */
+}
+
+#intro-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Memastikan video menutupi seluruh layar */
+}
+/* --- Komponen Status Badge --- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.status-pending_approval {
+  background-color: #FFFBEB; /* amber-50 */
+  color: #B45309;           /* amber-700 */
+}
+.status-approved {
+  background-color: #F0FDF4; /* green-50 */
+  color: #166534;           /* green-800 */
+}
+.status-rejected {
+  background-color: #FEF2F2; /* red-50 */
+  color: #991B1B;           /* red-800 */
+}
+
+/* --- Komponen Tabel Responsif --- */
+@media (max-width: 767px) {
+  .responsive-table thead {
+    display: none;
+  }
+  .responsive-table tr {
+    display: block;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0; /* slate-200 */
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+  .responsive-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    text-align: right;
+    border-bottom: 1px solid #f1f5f9; /* slate-100 */
+  }
+  .responsive-table td:last-child {
+    border-bottom-width: 0;
+  }
+  .responsive-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #475569; /* slate-600 */
+    text-align: left;
+  }
 }

@@ -10,9 +10,12 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
-    })
+    ->withMiddleware(function (Middleware $middleware) {
+    // --- TAMBAHKAN ALIAS ANDA DI SINI ---
+    $middleware->alias([
+        'is_hrd' => \App\Http\Middleware\CheckIsHrd::class,
+    ]);
+})
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
