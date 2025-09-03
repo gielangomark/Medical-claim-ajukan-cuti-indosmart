@@ -25,14 +25,19 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // 1. Validasi input dari form login (hanya NIK dan Password)
+        // 1. Validasi input dari form login (boleh NIK atau email)
         $request->validate([
-            'nik' => ['required', 'string'],
+            'nik' => ['required_without:email', 'string'],
+            'email' => ['required_without:nik', 'email'],
             'password' => ['required', 'string'],
         ]);
 
-        // 2. Siapkan data kredensial untuk percobaan login
-        $credentials = $request->only('nik', 'password');
+        // 2. Siapkan data kredensial untuk percobaan login (prioritaskan email jika ada)
+        if ($request->filled('email')) {
+            $credentials = $request->only('email', 'password');
+        } else {
+            $credentials = $request->only('nik', 'password');
+        }
 
         // 3. Coba lakukan proses autentikasi
         if (Auth::attempt($credentials, $request->boolean('remember'))) {

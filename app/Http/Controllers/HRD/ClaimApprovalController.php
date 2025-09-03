@@ -67,7 +67,7 @@ class ClaimApprovalController extends Controller
         $userToNotify = $claim->user;
         $greeting = 'Halo, ' . $userToNotify->name;
         $actionText = 'Lihat Detail Klaim';
-        $actionUrl = route('claims.show', $claim);
+        $actionUrl = route('pengajuan.medical.show', $claim);
         $flashMessage = '';
         
         // Menyiapkan variabel spesifik berdasarkan status

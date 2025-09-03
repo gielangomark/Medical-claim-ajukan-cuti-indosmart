@@ -77,11 +77,16 @@
                 <p class="content-text">{!! $line !!}</p>
             @endforeach
             
-            @if ($actionText && $actionUrl)
+            @if ($actionText && $actionUrl && ! $actionText2)
             <div class="button-container">
                 <a href="{{ $actionUrl }}" class="action-button" target="_blank">
                     {{ $actionText }}
                 </a>
+            </div>
+            @elseif($actionText2 && $actionUrl2)
+            <div class="button-container">
+                <a href="{{ $actionUrl2 }}" class="action-button" target="_blank" style="background:#10b981; margin-right:8px;">{{ $actionText2 }}</a>
+                <a href="{{ $actionUrl }}" class="action-button" target="_blank" style="background:#ef4444;">{{ $actionText }}</a>
             </div>
             @endif
             

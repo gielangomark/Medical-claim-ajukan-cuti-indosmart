@@ -20,17 +20,22 @@ class GenericNotification extends Mailable
     public array $lines;
     public string $actionText;
     public string $actionUrl;
+    // Optional second action (for one-click accept/decline)
+    public ?string $actionText2 = null;
+    public ?string $actionUrl2 = null;
 
     /**
      * Buat instance pesan baru.
      */
-    public function __construct(string $subject, string $greeting, array $lines, string $actionText, string $actionUrl)
+    public function __construct(string $subject, string $greeting, array $lines, string $actionText = '', string $actionUrl = '', ?string $actionText2 = null, ?string $actionUrl2 = null)
     {
         $this->subject = $subject;
         $this->greeting = $greeting;
         $this->lines = $lines;
         $this->actionText = $actionText;
         $this->actionUrl = $actionUrl;
+        $this->actionText2 = $actionText2;
+        $this->actionUrl2 = $actionUrl2;
     }
 
     /**

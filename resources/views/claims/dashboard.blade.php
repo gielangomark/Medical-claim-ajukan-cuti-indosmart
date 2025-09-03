@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dasbor Karyawan')
+@section('title', 'Dashboard User')
 
 @push('styles')
 <style>
@@ -56,7 +56,7 @@
     @endif
 
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">Dashboard Karyawan</h1>
+        <h1 class="text-2xl font-bold text-gray-900">Dashboard User</h1>
         <p class="text-gray-600 mt-1">Selamat datang, {{ Auth::user()->name }}. Kelola klaim dan data pribadi Anda dengan mudah.</p>
     </div>
 
@@ -80,7 +80,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <a href="{{ route('claims.create') }}" class="group bg-white rounded-xl card-shadow border border-gray-200 p-6 card-hover transition-all duration-200">
+        <a href="{{ route('pengajuan.medical.create') }}" class="group bg-white rounded-xl card-shadow border border-gray-200 p-6 card-hover transition-all duration-200">
             <div class="flex items-center space-x-4">
                 <div class="bg-blue-100 p-3 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
@@ -139,7 +139,7 @@
                                     </span>
                                 </td>
                                 <td class="py-4 px-4 text-center">
-                                    <a href="{{ route('claims.show', $claim) }}" class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">Lihat Detail</a>
+                                    <a href="{{ route('pengajuan.medical.show', $claim) }}" class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">Lihat Detail</a>
                                 </td>
                             </tr>
                         @empty

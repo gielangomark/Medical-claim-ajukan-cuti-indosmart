@@ -9,6 +9,7 @@ use App\Models\ClaimDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ClaimController extends Controller
 {
@@ -17,7 +18,28 @@ class ClaimController extends Controller
      */
     public function index()
     {
-        // Akan digunakan untuk menampilkan riwayat klaim karyawan
+    // Tampilkan dashboard/daftar klaim untuk user yang sedang login
+    $user = Auth::user();
+
+    // Ambil klaim milik user
+    $claims = Claim::where('user_id', $user->id)->orderByDesc('created_at')->get();
+
+    // Hitung total klaim yang sudah disetujui tahun ini untuk menghitung sisa jatah
+    $approvedClaimsTotal = Claim::where('user_id', $user->id)
+                    ->where('status', 'approved')
+                    ->whereYear('submitted_at', date('Y'))
+                    ->sum('total_amount');
+
+    $remainingAllotment = $user->claim_allotment - $approvedClaimsTotal;
+
+    // Ambil 5 riwayat klaim terakhir (non-draft)
+    $recentClaims = Claim::where('user_id', $user->id)
+                ->where('status', '!=', 'draft')
+                ->latest('submitted_at')
+                ->take(5)
+                ->get();
+
+    return view('claims.dashboard', compact('claims', 'remainingAllotment', 'recentClaims'));
     }
 
     /**
@@ -93,7 +115,7 @@ class ClaimController extends Controller
         $claim->total_amount = $claim->details()->sum('amount');
         $claim->save();
 
-        return redirect()->route('claims.create')->with('success', 'Rincian klaim berhasil ditambahkan.');
+        return redirect()->route('pengajuan.medical.create')->with('success', 'Rincian klaim berhasil ditambahkan.');
     }
 
     /**
@@ -101,11 +123,10 @@ class ClaimController extends Controller
      */
     public function show(Claim $claim)
     {
-        if ($claim->user_id !== Auth::id()) {
-            abort(403);
-        }
-        $claim->load('details');
-        return view('claims.show', compact('claim'));
+    // Allow any authenticated user to view the claim (per request)
+    // Keep loading details and show the view. Admin/HRD logic still applies elsewhere.
+    $claim->load('details');
+    return view('claims.show', compact('claim'));
     }
 
     /**
@@ -124,8 +145,27 @@ class ClaimController extends Controller
     {
         $user = Auth::user();
 
+        // If the current user is not the claim owner, log it but allow submission per requested behavior
         if ($claim->user_id !== $user->id) {
-            abort(403, 'Anda tidak memiliki akses ke klaim ini.');
+            Log::info('Claim submitted by non-owner', ['claim_id' => $claim->id, 'claim_user_id' => $claim->user_id, 'auth_user_id' => $user->id]);
+            // optionally, you may want to notify HRD or the original owner here
+        }
+
+        // Debug: log detail count and items to help investigate cases where count() seems 0
+        try {
+            $detailCount = $claim->details()->count();
+            $detailSamples = $claim->details()->select('id','amount','description')->take(5)->get()->toArray();
+            Log::debug('Claim update - details snapshot', ['claim_id' => $claim->id, 'detail_count' => $detailCount, 'details' => $detailSamples]);
+        } catch (\Exception $e) {
+            Log::error('Failed to snapshot claim details for debug', ['claim_id' => $claim->id, 'error' => $e->getMessage()]);
+        }
+
+        // Ensure we have the latest DB state for this claim and its relations
+        try {
+            $claim->refresh();
+            $claim->load('details');
+        } catch (\Exception $e) {
+            Log::warning('Failed to refresh claim before validation', ['claim_id' => $claim->id, 'error' => $e->getMessage()]);
         }
 
         $claim->update($request->only(['period_month', 'period_year']));
@@ -136,7 +176,7 @@ class ClaimController extends Controller
                 'title' => 'Pengajuan Gagal!',
                 'message' => 'Anda harus menambahkan setidaknya satu rincian klaim sebelum mengajukan.',
                 'button_text' => 'Kembali ke Formulir',
-                'button_url' => route('claims.create')
+                'button_url' => route('pengajuan.medical.create')
             ]);
         }
 
@@ -152,7 +192,7 @@ class ClaimController extends Controller
                 'title' => 'Pengajuan Gagal!',
                 'message' => 'Total klaim yang Anda ajukan (Rp '.number_format($claim->total_amount,0,',','.').') melebihi sisa jatah Anda (Rp '.number_format($remainingAllotment,0,',','.').').',
                 'button_text' => 'Kembali ke Formulir',
-                'button_url' => route('claims.create')
+                'button_url' => route('pengajuan.medical.create')
             ]);
         }
 

@@ -14,15 +14,17 @@ class GeneralNotification extends Notification
     protected $title;
     protected $message;
     protected $url;
+    protected $meta;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($title, $message, $url)
+    public function __construct($title, $message, $url, $meta = [])
     {
         $this->title = $title;
         $this->message = $message;
         $this->url = $url;
+        $this->meta = $meta;
     }
 
     /**
@@ -43,6 +45,7 @@ class GeneralNotification extends Notification
             'title' => $this->title,
             'message' => $this->message,
             'url' => $this->url,
+            'meta' => $this->meta,
         ];
     }
 }

@@ -311,12 +311,12 @@ body.no-splash #robot-container.eyes-closed .robot-eye {
 <body @if($errors->any()) class="no-splash" @endif>
 
     <div id="splash-screen">
-        <img id="splash-logo" src="{{ asset('Indosmart-Update.png') }}" alt="Logo Indosmart">
+        <img id="splash-logo" src="{{ asset('Indosmart-Update.png') }}" alt="Logo Indosmart" style="height:140px; width:auto; max-width:320px;">
     </div>
 
     <div class="top-bar fixed top-0 left-0 w-full z-10"></div>
 
-    <img id="header-logo" src="{{ asset('Indosmart-Update.png') }}" alt="Logo Indosmart">
+    <img id="header-logo" src="{{ asset('Indosmart-Update.png') }}" alt="Logo Indosmart" style="height:80px; width:auto; max-width:240px; object-fit:contain;">
     
     <div id="robot-container">
         <div id="robot-face">
@@ -335,7 +335,7 @@ body.no-splash #robot-container.eyes-closed .robot-eye {
             <div class="h-24" style="margin-top: 80px;"></div>
             
             <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-slate-800">Medical Claim</h1>
+                <h1 class="text-2xl font-bold text-slate-800">Medical Claim & Pengajuan Cuti</h1>
                 <p class="text-slate-600 mt-1 text-sm">Silahkan Login untuk melanjutkan</p>
             </div>
             

@@ -29,7 +29,8 @@ class DataChangeApprovalController extends Controller
     
     public function show(DataChangeRequest $data_change)
     {
-        return view('hrd.data-changes.show', ['request' => $data_change]);
+        // Pass the model as 'change' to avoid colliding with the HTTP request variable in views
+        return view('hrd.data-changes.show', ['change' => $data_change]);
     }
 
     /**
@@ -107,6 +108,46 @@ class DataChangeApprovalController extends Controller
 
             // Kembalikan ke halaman sebelumnya dengan pesan error
             return redirect()->back()->with('error', 'Terjadi kesalahan internal saat memproses data. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Handle rejection via DELETE form (legacy UI posts a DELETE with rejection_reason).
+     */
+    public function destroy(Request $request, DataChangeRequest $data_change)
+    {
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string|min:10',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $user = $data_change->user;
+            $data_change->status = 'rejected';
+            $data_change->rejection_reason = $validated['rejection_reason'];
+            $data_change->processed_by = Auth::id();
+            $data_change->save();
+
+            // Kirim notifikasi email ke pemohon
+            $subject = "Pengajuan Perubahan Data Ditolak";
+            $lines = [
+                "Mohon maaf, pengajuan perubahan data Anda ditolak.",
+                "<strong>Alasan:</strong> " . $validated['rejection_reason'],
+            ];
+            $greeting = "Halo, {$user->name}!";
+            $actionText = 'Lihat Pengajuan';
+            $actionUrl = route('request-change.show', $data_change);
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\GenericNotification($subject, $greeting, $lines, $actionText, $actionUrl));
+
+            DB::commit();
+
+            return redirect()->route('hrd.data-changes.index')->with('success', 'Pengajuan telah ditolak dan pemberitahuan dikirimkan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menolak pengajuan perubahan data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memproses penolakan.');
         }
     }
 }

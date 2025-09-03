@@ -24,7 +24,7 @@
                 {{-- Logo --}}
                 <div class="flex-shrink-0">
                     <a href="{{ route('dashboard') }}">
-                        <img src="{{ asset('indosmart-update.png') }}" alt="Logo Indosmart" class="h-8" onerror="this.onerror=null;this.src='https://placehold.co/150x40/003366/FFFFFF?text=INDOSMART';">
+                        <img src="{{ asset('indosmart-update.png') }}" alt="Logo Indosmart" class="h-28 sm:h-30 w-auto" style="object-fit:contain;" onerror="this.onerror=null;this.src='https://placehold.co/200x60/003366/FFFFFF?text=INDOSMART';">
                     </a>
                 </div>
 

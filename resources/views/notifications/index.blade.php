@@ -52,7 +52,7 @@
                 @forelse ($notifications as $notification)
                     {{-- PERBAIKAN: Menambahkan indikator notifikasi belum dibaca --}}
                     <li class="relative p-4 hover:bg-slate-50 transition {{ !$notification->read_at ? 'bg-blue-50' : '' }}">
-                        <a href="{{ $notification->data['url'] }}" class="block">
+                        <div class="block">
                             <div class="flex items-start space-x-4">
                                 <div class="flex-shrink-0">
                                     <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -65,7 +65,30 @@
                                     <p class="text-xs text-slate-400 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
                                 </div>
                             </div>
-                        </a>
+
+                            {{-- If this notification is about pengganti for cuti, show accept/decline buttons for assigned user --}}
+                            @php
+                                $meta = $notification->data['meta'] ?? [];
+                                $isPengganti = isset($meta['type']) && $meta['type'] === 'pengganti';
+                                $cutiId = $meta['cuti_id'] ?? null;
+                                $toUser = $meta['to_user_id'] ?? null;
+                            @endphp
+
+                            @if($isPengganti && $toUser && auth()->id() == $toUser)
+                                <div class="mt-3 flex items-center space-x-2">
+                                    <form method="POST" action="{{ route('cuti.respondPengganti', $cutiId ?? 0) }}">
+                                        @csrf
+                                        <input type="hidden" name="action" value="accept">
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-emerald-600 text-white rounded-md text-sm">Terima</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('cuti.respondPengganti', $cutiId ?? 0) }}">
+                                        @csrf
+                                        <input type="hidden" name="action" value="decline">
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 text-white rounded-md text-sm">Tolak</button>
+                                    </form>
+                                </div>
+                            @endif
+                        </div>
                         {{-- Indikator titik biru untuk notifikasi yang belum dibaca --}}
                         @if (!$notification->read_at)
                             <div class="absolute top-4 right-4 h-3 w-3 rounded-full bg-blue-500" title="Belum dibaca"></div>

@@ -32,7 +32,7 @@
             @endif
              
             <div class="mb-8 text-center">
-                <img src="{{ asset('indosmart-Update.png') }}" alt="Logo Indosmart" class="mx-auto mb-4 h-10" onerror="this.onerror=null;this.src='https://placehold.co/200x60/003366/FFFFFF?text=INDOSMART';">
+                <img src="{{ asset('indosmart-Update.png') }}" alt="Logo Indosmart" class="mx-auto mb-4 h-10 sm:h-14 w-auto" style="object-fit:contain;" onerror="this.onerror=null;this.src='https://placehold.co/200x60/003366/FFFFFF?text=INDOSMART';">
                 <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Pengajuan Perubahan Data Pribadi</h1>
                 <p class="text-slate-500 mt-1">Perubahan data memerlukan verifikasi dari tim HRD.</p>
             </div>
@@ -67,8 +67,8 @@
                         Anda tidak dapat mengajukan perubahan status perkawinan karena data Anda sudah tercatat sebagai 'Menikah'. Jika ada kesalahan data, silakan hubungi HRD.
                     </p>
                     <div class="mt-6">
-                        <a href="{{ route('dashboard') }}" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition">
-                            Kembali ke Dashboard
+                        <a href="{{ route('profile.edit') }}" onclick="event.preventDefault(); if(history.length>1){ history.back(); } else { window.location='{{ route('profile.edit') }}'; }" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition">
+                            Kembali ke Profil
                         </a>
                     </div>
                 </div>
@@ -112,7 +112,7 @@
                     <hr class="pt-2">
 
                     <div class="flex justify-end gap-4">
-                        <a href="{{ route('dashboard') }}" class="bg-slate-200 text-slate-800 font-semibold py-2 px-5 rounded-lg hover:bg-slate-300 transition">
+                        <a href="{{ route('profile.edit') }}" onclick="event.preventDefault(); if(history.length>1){ history.back(); } else { window.location='{{ route('profile.edit') }}'; }" class="bg-slate-200 text-slate-800 font-semibold py-2 px-5 rounded-lg hover:bg-slate-300 transition">
                             Batal
                         </a>
                         <button type="submit" class="bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-blue-700 transition">

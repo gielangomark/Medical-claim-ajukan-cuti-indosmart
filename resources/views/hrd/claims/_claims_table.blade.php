@@ -11,9 +11,9 @@
                 {{-- Baris Karyawan --}}
                 <div class="flex justify-between items-start">
                     <span class="text-sm font-semibold text-slate-500">Karyawan</span>
-                    <div class="text-right">
-                        <p class="font-bold text-slate-800">{{ $claim->user->name }}</p>
-                        <p class="text-xs text-slate-500">NIK: {{ $claim->user->nik }}</p>
+                        <div class="text-right">
+                        <p class="font-bold text-slate-800">{{ optional($claim->user)->name ?? '-' }}</p>
+                        <p class="text-xs text-slate-500">NIK: {{ optional($claim->user)->nik ?? '-' }}</p>
                     </div>
                 </div>
 
@@ -73,8 +73,8 @@
                     <tr class="hover:bg-slate-50">
                         <td class="py-4 px-6">
                             <div>
-                                <p class="font-semibold text-slate-800">{{ $claim->user->name }}</p>
-                                <p class="text-sm text-slate-500">NIK: {{ $claim->user->nik }}</p>
+                                <p class="font-semibold text-slate-800">{{ optional($claim->user)->name ?? '-' }}</p>
+                                <p class="text-sm text-slate-500">NIK: {{ optional($claim->user)->nik ?? '-' }}</p>
                             </div>
                         </td>
                         <td class="py-4 px-6 text-sm text-slate-600">

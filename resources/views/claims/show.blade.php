@@ -33,7 +33,7 @@
         <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0">
-                    <img src="{{ asset('indosmart-update.png') }}" alt="Logo Indosmart" class="h-8" onerror="this.onerror=null;this.src='https://placehold.co/150x40/003366/FFFFFF?text=INDOSMART';">
+                    <img src="{{ asset('indosmart-update.png') }}" alt="Logo Indosmart" class="h-10 sm:h-14 w-auto" style="object-fit:contain;" onerror="this.onerror=null;this.src='https://placehold.co/150x40/003366/FFFFFF?text=INDOSMART';">
                 </div>
                 <div class="flex items-center">
                     <span class="text-sm font-medium text-slate-600 mr-4 hidden sm:block">{{ Auth::user()->name }}</span>

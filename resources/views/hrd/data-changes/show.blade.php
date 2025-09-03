@@ -11,9 +11,9 @@
     <!-- Details Container -->
     <div class="bg-white rounded-2xl shadow-lg">
         <!-- Header -->
-        <div class="p-6 border-b border-slate-200">
+            <div class="p-6 border-b border-slate-200">
             <h2 class="text-2xl font-bold text-slate-800">Detail Pengajuan Perubahan Data</h2>
-            <p class="text-slate-500">Karyawan: <span class="font-semibold text-slate-700">{{ $request->user->name }}</span> (NIK: {{ $request->user->nik }})</p>
+            <p class="text-slate-500">Karyawan: <span class="font-semibold text-slate-700">{{ $change->user->name }}</span> (NIK: {{ $change->user->nik }})</p>
         </div>
         
         <!-- Body -->
@@ -24,19 +24,19 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg">
                     <div>
                         <p class="text-sm text-slate-500">Jenis Pengajuan</p>
-                        <p class="font-semibold text-slate-800">{{ ucwords(str_replace('_', ' ', $request->request_type)) }}</p>
+                        <p class="font-semibold text-slate-800">{{ ucwords(str_replace('_', ' ', $change->request_type)) }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-slate-500">Status Baru</p>
-                        <p class="font-semibold text-slate-800">{{ ucfirst($request->new_data['marital_status']) }}</p>
+                        <p class="font-semibold text-slate-800">{{ ucfirst($change->new_data['marital_status']) }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-slate-500">Nama Pasangan</p>
-                        <p class="font-semibold text-slate-800">{{ $request->new_data['spouse_name'] }}</p>
+                        <p class="font-semibold text-slate-800">{{ $change->new_data['spouse_name'] }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-slate-500">Tanggal Lahir Pasangan</p>
-                        <p class="font-semibold text-slate-800">{{ \Carbon\Carbon::parse($request->new_data['spouse_dob'])->format('d M Y') }}</p>
+                        <p class="font-semibold text-slate-800">{{ \Carbon\Carbon::parse($change->new_data['spouse_dob'])->format('d M Y') }}</p>
                     </div>
                 </div>
             </div>
@@ -44,8 +44,8 @@
             <!-- Proof Document -->
             <div>
                 <h3 class="font-semibold text-slate-800 mb-2">Dokumen Pendukung</h3>
-                @if ($request->proof_document_path)
-                    <a href="{{ asset('storage/' . $request->proof_document_path) }}" target="_blank" class="inline-flex items-center space-x-2 text-blue-600 hover:underline">
+                @if ($change->proof_document_path)
+                    <a href="{{ route('request-change.proof', $change->id) }}" target="_blank" class="inline-flex items-center space-x-2 text-blue-600 hover:underline">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link">
                             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                             <polyline points="15 3 21 3 21 9"></polyline>
@@ -62,7 +62,7 @@
             <div>
                 <h3 class="font-semibold text-slate-800 mb-2">Tindakan Persetujuan</h3>
                 <div id="rejection-form" class="hidden space-y-2">
-                    <form action="{{ route('hrd.data-changes.destroy', $request->id) }}" method="POST">
+                    <form action="{{ route('hrd.data-changes.destroy', $change->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
                         <label for="rejection_reason" class="text-sm font-medium text-slate-700">Alasan Penolakan (Wajib diisi)</label>
@@ -76,9 +76,10 @@
         <!-- Footer with Action Buttons -->
         <div class="p-6 bg-slate-50 rounded-b-2xl flex justify-end items-center gap-4">
             <button id="reject-btn" class="bg-red-100 text-red-700 font-semibold py-2 px-5 rounded-lg hover:bg-red-200 transition">Tolak</button>
-            <form action="{{ route('hrd.data-changes.update', $request->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui perubahan data ini?');">
+            <form action="{{ route('hrd.data-changes.update', $change->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui perubahan data ini?');">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="status" value="approved">
                 <button type="submit" class="bg-green-600 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-green-700 transition">Setujui Perubahan</button>
             </form>
         </div>

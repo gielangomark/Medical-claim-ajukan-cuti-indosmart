@@ -104,7 +104,7 @@
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                                 </a>
                                                 @endif
-                                                <form action="{{ route('claims.details.destroy', $detail) }}" method="POST" onsubmit="return confirm('Hapus rincian ini?');">
+                                                <form action="{{ route('pengajuan.medical.details.destroy', $detail) }}" method="POST" onsubmit="return confirm('Hapus rincian ini?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-500 hover:text-red-700" title="Hapus Rincian">
@@ -146,7 +146,7 @@
             </div>
 
             {{-- Form Tersembunyi untuk Aksi Final --}}
-            <form id="main-claim-form" action="{{ route('claims.update', $claim) }}" method="POST" class="hidden">
+            <form id="main-claim-form" action="{{ route('pengajuan.medical.update', $claim) }}" method="POST" class="hidden">
                 @csrf
                 @method('PUT')
             </form>
@@ -164,7 +164,7 @@
                     <h2 class="text-xl font-bold text-slate-800">Tambah Rincian Klaim</h2>
                 </div>
 
-                <form action="{{ route('claims.details.store', $claim) }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('pengajuan.medical.details.store', $claim) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="p-6 space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -234,6 +234,19 @@
         
         // --- Event Listener untuk tombol "Ajukan Sekarang" ---
         const submitMainFormBtn = document.getElementById('submit-main-form-btn');
+        // initialize button disabled state based on current total
+        function syncSubmitButton() {
+            const totalDisplay = document.getElementById('total-claim-display');
+            if (!totalDisplay) return;
+            const totalText = totalDisplay.textContent.replace(/[^\d]/g, '');
+            const total = parseInt(totalText) || 0;
+            if (submitMainFormBtn) submitMainFormBtn.disabled = (total === 0);
+        }
+
+        // run sync on load and after total updates
+        updateTotalDisplay();
+        syncSubmitButton();
+
         if (submitMainFormBtn) {
             submitMainFormBtn.addEventListener('click', function() {
                 const mainForm = document.getElementById('main-claim-form');
@@ -255,6 +268,15 @@
                     mainForm.querySelectorAll('.temp-input').forEach(e => e.remove());
                 }
             });
+        }
+        // Re-sync button whenever details table changes (basic DOM mutation observer)
+        const tbody = document.querySelector('tbody');
+        if (tbody) {
+            const mo = new MutationObserver(() => {
+                updateTotalDisplay();
+                syncSubmitButton();
+            });
+            mo.observe(tbody, { childList: true, subtree: true });
         }
     });
 </script>

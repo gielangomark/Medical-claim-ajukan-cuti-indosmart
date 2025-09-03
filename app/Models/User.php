@@ -23,8 +23,9 @@ class User extends Authenticatable
         'password',
         'nik',
         'department',
-        'gender',         // <-- Tambahkan ini
-        'marital_status', // <-- Tambahkan ini
+    'gender',         // <-- Tambahkan ini
+    'marital_status', // <-- Tambahkan ini
+    'work_hours',
     ];
 
     /**
@@ -53,6 +54,12 @@ class User extends Authenticatable
     public function claims()
     {
         return $this->hasMany(Claim::class);
+    }
+
+    // Users that can act as substitutes (simple helper)
+    public function scopePotentialSubstitutes($query, $department)
+    {
+    return $query->where('department', $department)->orderByDesc('work_hours');
     }
 
     public function familyMembers()

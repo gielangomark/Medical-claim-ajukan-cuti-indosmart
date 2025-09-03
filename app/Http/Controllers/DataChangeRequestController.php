@@ -7,6 +7,7 @@ use App\Models\DataChangeRequest; // Model untuk tabel pengajuan perubahan data
 use Illuminate\Http\Request; // Untuk mengelola data dari form
 use Illuminate\Support\Facades\Auth; // Untuk mendapatkan data user yang sedang login
 use Illuminate\Support\Facades\Storage; // Ditambahkan untuk mengelola file
+use Illuminate\Support\Facades\Log;
 
 class DataChangeRequestController extends Controller
 {
@@ -60,6 +61,8 @@ class DataChangeRequestController extends Controller
             // dan simpan path-nya ke dalam variabel $filePath.
             // Pastikan Anda sudah menjalankan 'php artisan storage:link'.
             $filePath = $request->file('proof_document')->store('public/proofs/data-changes');
+            // Normalize path to avoid stray whitespace/newlines
+            $filePath = trim(str_replace('\\', '/', $filePath));
         }
 
         // 4. Buat record baru di tabel 'data_change_requests'.
@@ -72,7 +75,7 @@ class DataChangeRequestController extends Controller
                 'spouse_name' => $validated['spouse_name'],
                 'spouse_dob' => $validated['spouse_dob'],
             ],
-            'proof_document_path' => $filePath,
+            'proof_document_path' => $filePath ? trim($filePath) : null,
         ]);
 
         // 5. Arahkan pengguna ke halaman hasil aksi dengan pesan sukses.
@@ -91,12 +94,55 @@ class DataChangeRequestController extends Controller
      */
     public function show(DataChangeRequest $data_change)
     {
-        // Keamanan: Pastikan user hanya bisa melihat pengajuannya sendiri.
-        if ($data_change->user_id !== Auth::id()) {
+        // Keamanan: Pastikan user yang melihat adalah pemilik pengajuan atau HRD.
+        // HRD harus bisa melihat semua pengajuan untuk kebutuhan verifikasi.
+        if ($data_change->user_id !== Auth::id() && Auth::user()->department !== 'hrd') {
             abort(403); // Tampilkan halaman 'Forbidden' jika mencoba akses data orang lain.
         }
 
         // Tampilkan view 'profile.request-change-show' dan kirim data pengajuan yang dipilih.
-        return view('profile.request-change-show', ['request' => $data_change]);
+    return view('profile.request-change-show', ['change' => $data_change]);
+    }
+
+    /**
+     * Stream proof document to authorized users (owner or HRD).
+     */
+    public function proof(DataChangeRequest $data_change)
+    {
+        // Authorization: owner or HRD
+        if ($data_change->user_id !== Auth::id() && Auth::user()->department !== 'hrd') {
+            abort(403);
+        }
+
+        if (! $data_change->proof_document_path) {
+            abort(404);
+        }
+
+        // Normalize path: trim, remove newlines and leading "public/" if present
+        $raw = $data_change->proof_document_path;
+        $rawTrim = trim($raw);
+        // Remove any stray CR/LF that were accidentally saved
+        $rawSanitized = str_replace(["\r", "\n"], '', $rawTrim);
+        $path = preg_replace('/^public\//', '', $rawSanitized);
+
+        // Debug log to help reproduce missing/invalid image issues
+        Log::info('proof.request', [
+            'data_change_id' => $data_change->id,
+            'user_id' => Auth::id(),
+            'raw_value' => $raw,
+            'sanitized' => $rawSanitized,
+            'storage_path' => $path,
+        ]);
+
+        // Use Storage facade to get full path
+        $disk = Storage::disk('public');
+        if (! $disk->exists($path)) {
+            Log::warning('proof.missing_file', ['data_change_id' => $data_change->id, 'checked_path' => $path]);
+            abort(404);
+        }
+
+        $fullPath = $disk->path($path);
+
+        return response()->file($fullPath);
     }
 }   
