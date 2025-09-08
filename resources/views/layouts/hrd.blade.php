@@ -13,17 +13,17 @@
         <!-- Header -->
         <header class="bg-white shadow-sm sticky top-0 z-30">
             <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-16">
+                <div class="flex flex-col md:flex-row justify-between items-center h-auto md:h-16 gap-3 md:gap-0">
                     <!-- Logo dan Navigasi Desktop -->
-                    <div class="flex items-center space-x-8">
+                    <div class="flex items-center space-x-6">
                         <a href="{{ route('hrd.users.index') }}" class="flex-shrink-0">
                             <img src="{{ asset('indosmart-update.png') }}"
                                  alt="Logo Indosmart"
-                                 class="h-28 sm:h-28 w-auto"
+                                 class="h-10 md:h-20 lg:h-28 w-auto max-w-full"
                                  style="object-fit:contain;"
                                  onerror="this.onerror=null;this.src='https://placehold.co/150x40/003366/FFFFFF?text=INDOSMART';">
                         </a>
-                        <nav class="hidden md:flex md:space-x-8">
+                        <nav class="hidden lg:flex lg:space-x-8">
                             <a href="{{ route('hrd.claims.index') }}" 
                                class="nav-item text-sm font-medium text-gray-500 @if(request()->routeIs('hrd.claims.*')) active @endif">
                                 Persetujuan Klaim

@@ -220,8 +220,11 @@ class CutiController extends Controller
             abort(404, 'Tidak ada pengganti yang ditugaskan untuk pengajuan ini.');
         }
 
-        $pengganti = $cuti->pengganti;
-        return view('cuti.pengganti_confirm', compact('cuti', 'pengganti'));
+    $pengganti = $cuti->pengganti;
+    // Provide viewerName/viewerDept so layout can show pengganti info on public pages
+    $viewerName = $pengganti->name ?? null;
+    $viewerDept = $pengganti->department ?? null;
+    return view('cuti.pengganti_confirm', compact('cuti', 'pengganti', 'viewerName', 'viewerDept'));
     }
 
     public function ajukanPengganti(Request $request, $id)
@@ -433,7 +436,9 @@ class CutiController extends Controller
             Log::error('Gagal mengirim email notifikasi respons pengganti (signed): ' . $e->getMessage());
         }
 
-        return view('cuti.pengganti_thanks', ['cuti' => $cuti]);
+    $viewerName = $cuti->pengganti->name ?? null;
+    $viewerDept = $cuti->pengganti->department ?? null;
+    return view('cuti.pengganti_thanks', ['cuti' => $cuti, 'viewerName' => $viewerName, 'viewerDept' => $viewerDept]);
     }
 
     /**
@@ -498,7 +503,9 @@ class CutiController extends Controller
             Log::error('Gagal mengirim email notifikasi respons pengganti (oneclick): ' . $e->getMessage());
         }
 
-        return view('cuti.pengganti_thanks', ['cuti' => $cuti]);
+    $viewerName = $cuti->pengganti->name ?? null;
+    $viewerDept = $cuti->pengganti->department ?? null;
+    return view('cuti.pengganti_thanks', ['cuti' => $cuti, 'viewerName' => $viewerName, 'viewerDept' => $viewerDept]);
     }
 }
 // Auto refresh dashboard HRD setelah submit pengganti

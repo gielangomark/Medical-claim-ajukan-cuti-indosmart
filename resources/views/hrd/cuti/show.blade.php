@@ -37,36 +37,37 @@
         <!-- Info Pengajuan -->
     <div class="bg-white p-6 rounded-2xl shadow-lg mb-6">
         <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-3">Informasi Pengajuan</h3>
-        <div class="space-y-4 text-sm">
-            <div class="flex justify-between">
-                <span class="text-slate-500">ID Pengajuan:</span>
-                <span class="font-semibold text-slate-700">CUTI-{{ str_pad($cuti->id, 4, '0', STR_PAD_LEFT) }}</span>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+                <div class="text-slate-500">ID Pengajuan</div>
+                <div class="font-semibold text-slate-700">CUTI-{{ str_pad($cuti->id, 4, '0', STR_PAD_LEFT) }}</div>
             </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">Karyawan:</span>
-                <span class="font-semibold text-slate-700">{{ optional($cuti->user)->name ?? '-' }} (ID: {{ optional($cuti->user)->employee_id ?? '-' }})</span>
+            <div>
+                <div class="text-slate-500">Karyawan</div>
+                <div class="font-semibold text-slate-700">{{ optional($cuti->user)->name ?? '-' }} (ID: {{ optional($cuti->user)->employee_id ?? '-' }})</div>
             </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">Tanggal Mulai:</span>
-                <span class="font-semibold text-slate-700">{{ optional($cuti->tanggal_mulai)->format('d M Y') }}</span>
+            <div>
+                <div class="text-slate-500">Tanggal Mulai</div>
+                <div class="font-semibold text-slate-700">{{ optional($cuti->tanggal_mulai)->format('d M Y') }}</div>
             </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">Durasi:</span>
-                <span class="font-semibold text-slate-700">{{ $cuti->duration }} hari</span>
+            <div>
+                <div class="text-slate-500">Durasi</div>
+                <div class="font-semibold text-slate-700">{{ $cuti->duration }} hari</div>
             </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">Sisa Cuti Saat Ini:</span>
-                <span class="font-semibold text-slate-700">{{ $remaining ?? ($cuti->user->cuti_quota ?? 12) }} hari</span>
+            <div class="sm:col-span-2">
+                <div class="text-slate-500">Sisa Cuti Saat Ini</div>
+                <div class="font-semibold text-slate-700">{{ $remaining ?? ($cuti->user->cuti_quota ?? 12) }} hari</div>
             </div>
-            <div class="">
-                <span class="text-slate-500">Alasan:</span>
+            <div class="sm:col-span-2">
+                <div class="text-slate-500">Alasan</div>
                 <p class="mt-1 text-slate-700">{{ $cuti->alasan }}</p>
             </div>
             @if($cuti->catatan)
-            <div>
-                <span class="text-slate-500">Catatan HRD:</span>
-                <p class="mt-1 text-slate-700">{{ $cuti->catatan }}</p>
-            </div>
+                <div class="sm:col-span-2">
+                    <div class="text-slate-500">Catatan HRD</div>
+                    <p class="mt-1 text-slate-700">{{ $cuti->catatan }}</p>
+                </div>
             @endif
         </div>
     </div>
