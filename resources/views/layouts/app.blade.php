@@ -108,7 +108,207 @@
         </div>
     </main>
 
+    <script>
+        (function(){
+            // Autosave/restore form drafts to localStorage.
+            // - Excludes inputs of type password and file.
+            // - Skip elements with attribute data-no-autosave
+            // - Key: form-draft:<pathname>:<form-id-or-index>
+            const EXCLUDED_TYPES = ['password','file'];
+            const DEBOUNCE_MS = 500;
+
+            function debounce(fn, ms){ let t; return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), ms); }; }
+
+            function formKey(form, idx){
+                const id = form.id || form.getAttribute('name') || ('form-' + idx);
+                return 'form-draft:' + location.pathname + ':' + id;
+            }
+
+            function serialize(form){
+                const data = {};
+
+                // helper to set by key
+                const set = (k, v) => { if (typeof v !== 'undefined') data[k] = v; };
+
+                // standard form controls
+                Array.from(form.elements).forEach(el=>{
+                    if (!el.name) return;
+                    if (el.dataset && typeof el.dataset.noAutosave !== 'undefined') return;
+                    if (EXCLUDED_TYPES.includes((el.type || '').toLowerCase())) return;
+
+                    const tag = (el.tagName || '').toLowerCase();
+                    if (tag === 'select'){
+                        if (el.multiple) set(el.name, Array.from(el.selectedOptions).map(o=>o.value));
+                        else set(el.name, el.value);
+                        return;
+                    }
+
+                    if (el.type === 'checkbox'){
+                        if (!data[el.name]) data[el.name] = [];
+                        if (el.checked) data[el.name].push(el.value);
+                        return;
+                    }
+
+                    if (el.type === 'radio'){
+                        if (el.checked) set(el.name, el.value);
+                        else if (typeof data[el.name] === 'undefined') set(el.name, null);
+                        return;
+                    }
+
+                    if (tag === 'textarea' || el.type === 'text' || el.type === 'email' || el.type === 'number' || el.type === 'tel' || el.type === 'url' || el.type === 'hidden'){
+                        set(el.name, el.value);
+                        return;
+                    }
+
+                    // fallback
+                    set(el.name, el.value || '');
+                });
+
+                // contenteditable elements inside the form (use data-autosave-name or id)
+                form.querySelectorAll('[contenteditable="true"]').forEach((el)=>{
+                    if (el.dataset && typeof el.dataset.noAutosave !== 'undefined') return;
+                    const key = el.dataset.autosaveName || el.id || el.getAttribute('name');
+                    if (!key) return;
+                    set(key, el.innerText);
+                });
+
+                // ARIA comboboxes or custom dropdowns
+                form.querySelectorAll('[role="combobox"], [data-autosave-value]').forEach((el)=>{
+                    if (el.dataset && typeof el.dataset.noAutosave !== 'undefined') return;
+                    const key = el.dataset.autosaveName || el.id || el.getAttribute('name');
+                    if (!key) return;
+                    // try common properties
+                    const v = el.getAttribute('aria-activedescendant') || el.getAttribute('data-value') || el.value || el.textContent;
+                    set(key, v);
+                });
+
+                return data;
+            }
+
+            function restore(form, data){
+                try{
+                    Array.from(form.elements).forEach(el=>{
+                        if (!el.name) return;
+                        if (el.dataset && typeof el.dataset.noAutosave !== 'undefined') return;
+                        if (EXCLUDED_TYPES.includes((el.type || '').toLowerCase())) return;
+
+                        const tag = (el.tagName || '').toLowerCase();
+                        const val = data[el.name];
+                        if (typeof val === 'undefined' || val === null) return;
+
+                        if (tag === 'select'){
+                            if (el.multiple && Array.isArray(val)){
+                                Array.from(el.options).forEach(opt => opt.selected = val.indexOf(opt.value) !== -1);
+                            } else {
+                                el.value = val;
+                            }
+                            return;
+                        }
+
+                        if (el.type === 'checkbox'){
+                            if (!Array.isArray(val)) return;
+                            el.checked = val.indexOf(el.value) !== -1;
+                            return;
+                        }
+
+                        if (el.type === 'radio'){
+                            el.checked = (el.value === val);
+                            return;
+                        }
+
+                        if (tag === 'textarea' || el.type === 'text' || el.type === 'email' || el.type === 'number' || el.type === 'tel' || el.type === 'url' || el.type === 'hidden'){
+                            el.value = val;
+                            return;
+                        }
+                        // fallback
+                        try { el.value = val; } catch(e){}
+                    });
+
+                    // restore contenteditable
+                    form.querySelectorAll('[contenteditable="true"]').forEach((el)=>{
+                        if (el.dataset && typeof el.dataset.noAutosave !== 'undefined') return;
+                        const key = el.dataset.autosaveName || el.id || el.getAttribute('name');
+                        if (!key) return;
+                        if (typeof data[key] !== 'undefined') el.innerText = data[key];
+                    });
+
+                    // restore combobox/custom dropdowns
+                    form.querySelectorAll('[role="combobox"], [data-autosave-value]').forEach((el)=>{
+                        if (el.dataset && typeof el.dataset.noAutosave !== 'undefined') return;
+                        const key = el.dataset.autosaveName || el.id || el.getAttribute('name');
+                        if (!key) return;
+                        const val = data[key];
+                        if (typeof val === 'undefined') return;
+                        // common attributes update
+                        try{
+                            if (el.getAttribute('aria-activedescendant')) el.setAttribute('aria-activedescendant', val);
+                            if (el.getAttribute('data-value') !== null) el.setAttribute('data-value', val);
+                            if ('value' in el) el.value = val;
+                        }catch(e){}
+                    });
+
+                }catch(e){ console.error('restore draft', e); }
+            }
+
+            function saveToStorage(key, form){
+                try{
+                    const payload = serialize(form);
+                    localStorage.setItem(key, JSON.stringify(payload));
+                }catch(e){ console.error('save draft', e); }
+            }
+
+            function loadFromStorage(key){
+                try{
+                    const raw = localStorage.getItem(key);
+                    if (!raw) return null;
+                    return JSON.parse(raw);
+                }catch(e){ return null; }
+            }
+
+            function clearStorage(key){ localStorage.removeItem(key); }
+
+            function makeBanner(){
+                const d = document.createElement('div');
+                d.className = 'mb-3 p-2 rounded border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 text-sm flex items-center justify-between';
+                d.innerHTML = '<div>Draft restored from local storage.</div>';
+                const controls = document.createElement('div');
+                controls.className = 'flex items-center gap-2';
+                const clearBtn = document.createElement('button');
+                clearBtn.type = 'button';
+                clearBtn.className = 'text-xs px-2 py-1 rounded bg-white border text-yellow-700';
+                clearBtn.textContent = 'Clear draft';
+                controls.appendChild(clearBtn);
+                d.appendChild(controls);
+                return {el: d, clearBtn};
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                document.querySelectorAll('form').forEach((form, idx) => {
+                    const key = formKey(form, idx);
+                    const draft = loadFromStorage(key);
+                    if (draft) {
+                        restore(form, draft);
+                        // attach banner
+                        try{
+                            const {el, clearBtn} = makeBanner();
+                            form.prepend(el);
+                            clearBtn.addEventListener('click', function(){ clearStorage(key); location.reload(); });
+                        }catch(e){}
+                    }
+
+                    const saver = debounce(()=> saveToStorage(key, form), DEBOUNCE_MS);
+                    form.addEventListener('input', saver, {passive: true});
+                    form.addEventListener('change', saver, {passive: true});
+
+                    // clear on reset/submit
+                    form.addEventListener('reset', function(){ clearStorage(key); });
+                    form.addEventListener('submit', function(){ clearStorage(key); });
+                });
+            });
+        })();
+    </script>
+
     @stack('scripts')
-    
+
 </body>
 </html>
