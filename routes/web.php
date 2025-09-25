@@ -92,6 +92,15 @@ Route::middleware('auth')->group(function () {
 
             // Approve Perubahan Data
             Route::resource('data-changes', DataChangeApprovalController::class);
+
+            // Slip Gaji Routes
+            Route::prefix('slip-gaji')->name('slip.')->group(function () {
+                Route::get('/', [App\Http\Controllers\HRD\SlipController::class, 'index'])->name('index');
+                Route::get('/{brand}', [App\Http\Controllers\HRD\SlipController::class, 'show'])
+                    ->name('show')
+                    ->where('brand', 'indosmart|smarttech');
+                Route::post('/generate-pdf', [App\Http\Controllers\HRD\SlipController::class, 'generatePdf'])->name('pdf');
+            });
         });
 });
 

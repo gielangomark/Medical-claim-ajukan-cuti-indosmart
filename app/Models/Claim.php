@@ -30,7 +30,7 @@ class Claim extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'submitted_at' => 'datetime', // <-- TAMBAHKAN BARIS INI
+        'submitted_at' => 'datetime',
     ];
 
 
