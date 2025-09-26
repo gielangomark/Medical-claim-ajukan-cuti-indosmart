@@ -120,7 +120,7 @@
         </div>
 
         <div class="employee-info">
-            <div>Nama / NIK: {{ $employee_name ?? '________________' }}</div>
+            <div >Nama / NIK: {{ $employee_name ?? '________________' }}</div>
             <div>Dept / Jabatan: {{ $department ?? '________________' }}</div>
             <div>Tgl Mulai Bekerja: {{ $join_date ?? '00/00/2025' }}</div>
             <div>Periode Gaji: {{ $period }}</div>
