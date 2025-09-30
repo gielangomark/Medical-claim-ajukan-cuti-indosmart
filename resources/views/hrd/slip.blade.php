@@ -265,7 +265,6 @@
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '{{ route("hrd.slip.pdf") }}';
-
         // Add CSRF token
         const csrfToken = document.createElement('input');
         csrfToken.type = 'hidden';
